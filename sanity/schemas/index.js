@@ -1,0 +1,10 @@
+export { home } from "./home.js";
+export { stats } from "./stats.js";
+export { profile } from "./profile.js";
+export { services } from "./services.js";
+export { resume } from "./resume.js";
+export { education } from "./education.js";
+export { experience } from "./experience.js";
+export { work } from "./work.js";
+export { feedback } from "./feedback.js";
+export { contact } from "./contact.js";
