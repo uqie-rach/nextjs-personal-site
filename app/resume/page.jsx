@@ -24,6 +24,7 @@ import {
 import { TooltipContent } from "@radix-ui/react-tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
+import sanity from "@/lib/sanity";
 
 const about = {
   title: "About me",
@@ -151,6 +152,31 @@ const skills = {
 };
 
 const Resume = () => {
+  const [work, setWork] = React.useState([]);
+  const [loader, setLoader] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchWork = async () => {
+      setLoader(true);
+    
+      try {
+        const response = await sanity.fetch(`*[_type == "work"]`);
+        console.log(response);
+    
+        setWork(response);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoader(false);
+      }
+    };
+
+    setTimeout(() => {
+      fetchWork();
+    }, 2000);
+    
+  }, [])
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}

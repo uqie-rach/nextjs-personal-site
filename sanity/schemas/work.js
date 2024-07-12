@@ -43,7 +43,10 @@ export const work = {
     {
       title: "Image",
       name: "image",
-      type: "string",
+      type: "image",
+      options: {
+        hotspot: true,
+      },
     },
     {
       title: "Live project",

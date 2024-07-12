@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import "swiper/css";
@@ -15,6 +15,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import WorkSliderNavigation from "@/components/WorkSliderNavigation";
+import sanity from "@/lib/sanity";
 
 const projects = [
   {
@@ -82,6 +83,24 @@ const projects = [
 
 const Work = () => {
   const [project, setProject] = useState(projects[0]);
+  const [loader, setLoader] = useState(false);
+  
+
+  // Fetch Work from sanity client
+  const fetchProjects = async () => {
+    setLoader(true);
+
+    try {
+      const response = await sanity.fetch(`*[_type == "work"]`);
+      console.log(response);
+
+      setProject(response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoader(false);
+    }
+  };
 
   const handleSlideChange = (swiper) => {
     // Get current slide index
@@ -89,6 +108,13 @@ const Work = () => {
     // update project state based on current slide index
     setProject(projects[currentSlideIndex]);
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      fetchProjects();
+    }, 2000);
+  }, [])
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -108,7 +134,7 @@ const Work = () => {
               </div>
               {/* category */}
               <h2 className="text-[42px] font-bold leading-none text-white group-hover:text-accent transition-all duration-500 capitalize">
-                {project.category} project
+                {project.title} project
               </h2>
               {/* description */}
               <p className="text-white/60">{project.description}</p>
