@@ -97,9 +97,9 @@ const Contact = () => {
               action=""
               className="flex flex-col gap-6 p-10 bg-[#27272c] rounded-xl"
             >
-              <h3 className="text-4xl text-accent">Let's work together</h3>
+              <h3 className="text-4xl text-accent">Let&apos;s work together</h3>
               <p className="text-white/60">
-                I'm always open to discussing product design work or partnership
+                I&apos;m always open to discussing product design work or partnership
                 opportunities.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
