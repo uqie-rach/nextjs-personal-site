@@ -10,5 +10,9 @@ export default defineConfig({
   plugins: [structureTool()],
   schema: {
     types: schemaTypes
-  }
+  },
+  reactStrictMode: true,
+  images: {
+    domains: ['cdn.sanity.io'],
+  },
 });
