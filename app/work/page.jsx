@@ -15,91 +15,36 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import WorkSliderNavigation from "@/components/WorkSliderNavigation";
-import sanity, { urlFor } from "@/lib/sanity";
 
-const mockProjects = [
-  {
-    num: "01",
-    title: "Project 1",
-    description: "This is a project description",
-    category: "Fullstack",
-    stack: [
-      {
-        name: "React",
-      },
-      {
-        name: "Node.js",
-      },
-      {
-        name: "MongoDB",
-      },
-    ],
-    image: "/projects/project-1.png",
-    live: "https://www.google.com",
-    github: "https://www.google.com",
-  },
-
-  {
-    num: "02",
-    title: "Project 2",
-    description: "This is a project description",
-    category: "Fullstack",
-    stack: [
-      {
-        name: "React",
-      },
-      {
-        name: "Node.js",
-      },
-      {
-        name: "MongoDB",
-      },
-    ],
-    image: "/projects/project-1.png",
-    live: "https://www.google.com",
-    github: "https://www.google.com",
-  },
-  {
-    num: "03",
-    title: "Project 3",
-    description: "This is a project description",
-    category: "Fullstack",
-    stack: [
-      {
-        name: "React",
-      },
-      {
-        name: "Node.js",
-      },
-      {
-        name: "MongoDB",
-      },
-    ],
-    image: "/projects/project-1.png",
-    live: "https://www.google.com",
-    github: "https://www.google.com",
-  },
-];
+// Constants
+import { projects as mockProjects } from "@/lib/constants";
+import { loadFromCache, saveToCache } from "@/utils/cache";
 
 const Work = () => {
   const [singleProject, setSingleProject] = useState(null);
   const [projects, setProjects] = useState(null);
-  const [loader, setLoader] = useState(false);
 
-  // Fetch Work from sanity client
   const fetchProjects = async () => {
-    setLoader(true);
-
     try {
-      const response = await sanity.fetch(`*[_type == "work"]`);
-      console.log(response);
+      // const response = await sanity.fetch(`*[_type == "work"]`);
+      const response = mockProjects;
+
+      const data = {
+        ...loadFromCache("projectsPage"),
+        projects: response,
+      };
+
+      console.log(response)
+
+      // Save fetched data to cache
+      saveToCache("projectsPage", data);
+
+      // Update state
 
       setSingleProject(response[0]);
       setProjects(response);
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoader(false);
     }
   };
 
@@ -110,10 +55,25 @@ const Work = () => {
     setSingleProject(projects[currentSlideIndex]);
   };
 
-  useEffect(() => {
-    setTimeout(() => {
+  const loadPage = async () => {
+    const projectPageCache = loadFromCache("projectsPage");
+
+    if (!projectPageCache) {
       fetchProjects();
-    }, 2000);
+      return;
+    }
+
+    if (projectPageCache.projects.length === 0) {
+      fetchProjects();
+      return;
+    }
+
+    setSingleProject(projectPageCache.projects[0]);
+    setProjects(projectPageCache.projects);
+  };
+
+  useEffect(() => {
+    loadPage();
   }, []);
 
   return (
@@ -136,20 +96,21 @@ const Work = () => {
                 </div>
                 {/* category */}
                 <h2 className="text-[42px] font-bold leading-none text-white group-hover:text-accent transition-all duration-500 capitalize">
-                  {singleProject.title} project
+                  {singleProject.title}
                 </h2>
                 {/* description */}
                 <p className="text-white/60">{singleProject.description}</p>
                 {/* stack */}
                 <ul className="flex gap-4">
-                  {singleProject && singleProject.stack.map((stack, i) => {
-                    return (
-                      <li key={i} className=" text-accent">
-                        {stack.name}
-                        {i !== singleProject.stack.length - 1 && ","}
-                      </li>
-                    );
-                  })}
+                  {singleProject &&
+                    singleProject.stack.map((stack, i) => {
+                      return (
+                        <li key={i} className=" text-accent">
+                          {stack.name}
+                          {i !== singleProject.stack.length - 1 && ","}
+                        </li>
+                      );
+                    })}
                 </ul>
                 {/* border */}
                 <div className="border border-white/20"></div>
@@ -195,25 +156,26 @@ const Work = () => {
                 className="xl:h-[520px] mb-12"
                 onSlideChange={handleSlideChange}
               >
-                {projects && projects.map((item, i) => {
-                  return (
-                    <SwiperSlide key={i} className="w-full">
-                      <div className="h-[460px] relative group flex justify-center items-center bg-pink-50/20">
-                        {/* overlay */}
-                        <div className="absolute top-0 bottom-0 w-full h-full bg-black/10 z-10" />
-                        {/* image */}
-                        <div className="relative w-full h-full">
-                          <Image
-                            src={urlFor(item.image.asset._ref).url()}
-                            fill
-                            objectFit="cover"
-                            className="rounded-lg"
-                          />
+                {projects &&
+                  projects.map((item, i) => {
+                    return (
+                      <SwiperSlide key={i} className="w-full">
+                        <div className="h-[460px] relative group flex justify-center items-center bg-pink-50/20">
+                          {/* overlay */}
+                          <div className="absolute top-0 bottom-0 w-full h-full bg-black/10 z-10" />
+                          {/* image */}
+                          <div className="relative w-full h-full">
+                            <Image
+                              src={item.image}
+                              fill
+                              objectFit="cover"
+                              className="rounded-lg"
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </SwiperSlide>
-                  );
-                })}
+                      </SwiperSlide>
+                    );
+                  })}
                 <WorkSliderNavigation
                   containerStyle="flex gap-2 absolute right-0 bottom-[calc(50%_-_22px)] xl:bottom-0 z-20 w-full justify-between xl:w-max xl:justify-none"
                   btnStyles="bg-accent hover:bg-accent-hover text-primary text-[22px] w-[44px] p-2 flex justify-center transition-all"
