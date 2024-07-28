@@ -19,12 +19,20 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={jetbrainsMono.variable}>
-        <Header />
-        <StairTransition />
-        <PageTransition>{children}</PageTransition>
-      </body>
-    </html>
+    <>
+      <head>
+        <script
+          src="https://kit.fontawesome.com/55a635dc45.js"
+          crossorigin="anonymous"
+        ></script>
+      </head>
+      <html lang="en">
+        <body className={jetbrainsMono.variable}>
+          <Header />
+          <StairTransition />
+          <PageTransition>{children}</PageTransition>
+        </body>
+      </html>
+    </>
   );
 }
