@@ -8,7 +8,10 @@ import Socials from "@/components/Socials";
 import Photo from "@/components/Photo";
 import Stats from "@/components/Stats";
 import { useEffect, useState } from "react";
-import sanity from "@/lib/sanity";
+
+// Constants
+import { profile as mockProfile, stats as mockStats } from "@/lib/constants.js";
+import { loadFromCache, saveToCache } from "@/utils/cache";
 
 export default function Home() {
   const [profile, setProfile] = useState(null);
@@ -16,9 +19,19 @@ export default function Home() {
 
   const fetchProfile = async () => {
     try {
-      const response = await sanity.fetch(`*[_type == "homepage"][0]`);
+      // const response = await sanity.fetch(`*[_type == "homepage"][0]`);
+      const response = mockProfile;
+      const data = {
+        ...loadFromCache("profilePage"),
+        profile: response,
+      };
+
+      // Save fetched data to cache
+      saveToCache("homepage", data);
 
       console.log(response);
+
+      // Update profile state
       setProfile(response);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -27,18 +40,66 @@ export default function Home() {
 
   const fetchStats = async () => {
     try {
-      const response = await sanity.fetch(`*[_type == "stats"]`);
+      // const response = await sanity.fetch(`*[_type == "stats"]`);
+      const response = mockStats;
+      const data = {
+        ...loadFromCache("homepage"),
+        stats: response,
+      };
+
+      // Save fetched data to cache
+      saveToCache("homepage", data);
 
       console.log(response);
+
+      // Update profile state
       setStats(response);
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
   };
 
+  const loadPage = () => {
+    const homepageCache = loadFromCache("homepage");
+
+    console.log(homepageCache);
+
+    if (!homepageCache) {
+      fetchProfile();
+      fetchStats();
+      return;
+    }
+
+    if (!homepageCache?.profile) {
+      fetchProfile();
+
+      if (!homepageCache?.stats) {
+        fetchStats();
+        return;
+      }
+
+      setStats(homepageCache.stats);
+      return;
+    }
+
+    if (!homepageCache?.stats) {
+      fetchStats();
+
+      if (!homepageCache?.profile) {
+        fetchProfile();
+        return;
+      }
+
+      setProfile(homepageCache.profile);
+      return;
+    }
+
+    setProfile(homepageCache.profile);
+    setStats(homepageCache.stats);
+  };
+
   useEffect(() => {
-    fetchProfile();
-    fetchStats();
+    loadPage();
   }, []);
 
   return (
@@ -48,7 +109,7 @@ export default function Home() {
           <div className="flex flex-col xl:flex-row items-center justify-between mb-12">
             {/* text */}
             <div className="text-center xl:text-left order-2 xl:order-none">
-              <span className="text-xl">{profile.subtitle || "Software Engineer"}</span>
+              <span className="text-xl">{profile.subtitle}</span>
               <h1 className="h1 mb-6">
                 Hello I&apos;m <br />{" "}
                 <span className="text-accent">Achmad Furqon</span>
